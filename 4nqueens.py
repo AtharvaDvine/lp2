@@ -1,57 +1,38 @@
-class NQueens: 
-    def __init__(self, N): 
-        self.N = N 
-        self.board = [[0] * N for _ in range(N)] 
-        self.column = [False] * N 
-        self.diagonal1 = [False] * (2 * N - 1) 
-        self.diagonal2 = [False] * (2 * N - 1) 
- 
-    def solve(self, row=0): 
-        if row == self.N: 
-            self.print_solution() 
-            return True 
- 
-        for col in range(self.N): 
-            if not self.is_safe(row, col): 
-                continue 
- 
-            self.place_queen(row, col) 
-            if self.solve(row + 1): 
-                return True  # Return true to get one solution only 
-            self.remove_queen(row, col) 
-         
-        return False 
- 
-    def is_safe(self, row, col): 
-        return not (self.column[col] or self.diagonal1[row - col + self.N - 1] or self.diagonal2[row + col]) 
- 
-    def place_queen(self, row, col): 
-        self.board[row][col] = 1 
-        self.column[col] = True 
-        self.diagonal1[row - col + self.N - 1] = True 
-        self.diagonal2[row + col] = True 
- 
-    def remove_queen(self, row, col): 
-        self.board[row][col] = 0 
-        self.column[col] = False 
-        self.diagonal1[row - col + self.N - 1] = False 
-        self.diagonal2[row + col] = False 
- 
-    def print_solution(self): 
-        print("\nSolution for N =", self.N)
-        print("Board layout:\n")
-        for row in self.board: 
-            print(" ".join("Q" if col else "." for col in row)) 
-        print("\nQ = Queen, . = Empty Square\n") 
- 
-if __name__ == "__main__": 
-    try:
-        N = int(input("Enter the size of the board (N): "))
-        if N <= 0:
-            print("Please enter a positive integer greater than 0.")
-        else:
-            solver = NQueens(N) 
-            if not solver.solve(): 
-                print("No solution exists.")
-    except ValueError:
-        print("Invalid input! Please enter a valid integer.")
+def print_solution(board): 
+    for row in board: 
+        print(" ".join("Q" if cell else "." for cell in row)) 
+    print("\n") 
+
+def is_safe(row, col, left_row, upper_diag, lower_diag, N): 
+    return not left_row[row] and not upper_diag[row + col] and not lower_diag[row - col + N - 1] 
+
+def solve_nqueens(board, col, left_row, upper_diag, lower_diag, N): 
+    if col >= N: 
+        print_solution(board) 
+        return True 
+
+    found = False 
+    for i in range(N): 
+        if is_safe(i, col, left_row, upper_diag, lower_diag, N): 
+            board[i][col] = 1 
+            left_row[i] = upper_diag[i + col] = lower_diag[i - col + N - 1] = True 
+            
+            found = solve_nqueens(board, col + 1, left_row, upper_diag, lower_diag, N) or found 
+            
+            
+            board[i][col] = 0 
+            left_row[i] = upper_diag[i + col] = lower_diag[i - col + N - 1] = False 
+
+    return found 
+
+def nqueens(): 
+    N = int(input("Enter the value of N: ")) 
+    board = [[0] * N for _ in range(N)] 
+    left_row = [False] * N 
+    upper_diag = [False] * (2 * N - 1) 
+    lower_diag = [False] * (2 * N - 1) 
+    
+    if not solve_nqueens(board, 0, left_row, upper_diag, lower_diag, N): 
+        print("No solution exists") 
+
+nqueens()
