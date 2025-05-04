@@ -1,60 +1,41 @@
-import heapq
+# Greedy Search Algortihm(Prims Algorithm)
+def prim(graph, start_node):
+    mst = []  
+    visited = set([start_node])  
+    edges = []  
+    total_cost = 0
+    
+    for neighbor, weight in graph[start_node]:
+        edges.append((weight, start_node, neighbor))
+    
+    while edges:
+        edges.sort()  
+        weight, parent, node = edges.pop(0) 
+        
+        if node not in visited:
+            visited.add(node)
+            total_cost += weight
+            mst.append((parent, node, weight))
+            
+            for neighbor, edge_weight in graph[node]:
+                if neighbor not in visited:
+                    edges.append((edge_weight, node, neighbor))
+    
+    return mst, total_cost
 
-def prim_mst(graph, start):
-    num_vertices = len(graph)
-    mst = []  # To store the resulting Minimum Spanning Tree
-    visited = [False] * num_vertices
-    min_heap = []
+graph = {}
+n = int(input("Enter number of edges: "))
+for _ in range(n):
+    u, v, w = input("Enter edge (node1 node2 weight): ").split()
+    w = int(w)
+    if u not in graph:
+        graph[u] = []
+    if v not in graph:
+        graph[v] = []
+    graph[u].append((v, w))
+    graph[v].append((u, w))
 
-    # Push the starting vertex with weight 0 and no parent (-1)
-    heapq.heappush(min_heap, (0, start, -1))
-
-    while min_heap:
-        weight, u, prev = heapq.heappop(min_heap)
-
-        if visited[u]:
-            continue
-
-        visited[u] = True
-
-        # Add edge to MST (ignore the first dummy edge)
-        if prev != -1:
-            mst.append((prev, u, weight))
-
-        # Explore all adjacent vertices
-        for v, w in graph[u]:
-            if not visited[v]:
-                heapq.heappush(min_heap, (w, v, u))
-
-    return mst
-
-def get_graph_input():
-    num_vertices = int(input("Enter the number of vertices: "))
-    graph = {i: [] for i in range(num_vertices)}
-
-    num_edges = int(input("Enter the number of edges: "))
-
-    print("Enter the edges (start_vertex end_vertex weight):")
-    for _ in range(num_edges):
-        u, v, weight = map(int, input().split())
-        graph[u].append((v, weight))
-        graph[v].append((u, weight))  # Since the graph is undirected
-
-    return graph
-
-def main():
-    graph = get_graph_input()
-    start_vertex = int(input("Enter the starting vertex for Prim's algorithm: "))
-
-    mst = prim_mst(graph, start_vertex)
-
-    print("\nEdges in the Minimum Spanning Tree:")
-    total_weight = 0
-    for u, v, w in mst:
-        print(f"{u} - {v} with weight {w}")
-        total_weight += w
-
-    print(f"\nTotal weight of MST: {total_weight}")
-
-if __name__ == "__main__":
-    main()
+start_node = input("Enter start node: ")
+mst, cost = prim(graph, start_node)
+print("Minimum Spanning Tree:", mst)
+print("Total Cost:", cost)
